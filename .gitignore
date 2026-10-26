@@ -1,2 +1,4 @@
+_geracao/
+index.antes-*.html
 .vercel
 .env*
