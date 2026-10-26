@@ -25,8 +25,11 @@
      Layout das seções modelado da LP de Guias de Contas (funis/guias-de-contas),
      com a identidade desta página (rosa, lilás, menta, Fredoka).
      CHECKOUTS (Wiapy): ainda nao criados.
-       Plano Essencial -> botao .js-checkout-essencial
-       Plano Completo  -> botoes .js-checkout-completo
+       R$ 10,00  Plano Essencial -> #btn-essencial (abre o popup antes)  https://pay.wiapy.com/cvIdsgG1-pV4
+       R$ 23,90  Plano Completo  -> .js-checkout-completo               https://pay.wiapy.com/beZ8AxD7MON
+       R$ 16,90  PopUp Completo  -> #upsell-sim do popup                https://pay.wiapy.com/sLCVTs3Zu4S_
+       R$  8,90  Back Redirect   -> (ainda sem uso na página)           https://pay.wiapy.com/uEggx0ywOEAo
+     Checkout Wiapy 6adefd7d4d9e325d97909d56.
      Os precos estao marcados como R$ __,__ (procure "PRECO").
      ============================================================ -->
 
@@ -275,6 +278,29 @@ h3{font-size:clamp(18px,2.1vw,21px);font-weight:600}
 .lista-bonus li{display:flex;gap:9px;font-size:14.5px;line-height:1.45;align-items:flex-start}
 .lista-bonus .ico{width:18px;height:18px;color:var(--rosa);margin-top:1px}
 @media(max-width:820px){.planos{grid-template-columns:1fr;max-width:520px}}
+
+/* ---------- POPUP DE UPSELL (abre no clique do Plano Essencial) ---------- */
+.modal[hidden]{display:none}
+.modal{position:fixed;inset:0;z-index:99;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-fundo{position:absolute;inset:0;background:rgba(54,37,106,.68);backdrop-filter:blur(2px);animation:aparece .18s ease}
+.modal-caixa{position:relative;background:#fff;border-radius:22px;padding:clamp(28px,4vw,40px) clamp(20px,3.4vw,34px);width:100%;max-width:460px;text-align:center;
+  box-shadow:0 30px 70px rgba(54,37,106,.36);animation:sobe .22s cubic-bezier(.2,.9,.3,1.2);max-height:92vh;overflow-y:auto}
+@keyframes aparece{from{opacity:0}to{opacity:1}}
+@keyframes sobe{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.modal-x{position:absolute;top:10px;right:12px;background:none;border:none;font-size:26px;line-height:1;color:#A39BB0;cursor:pointer;padding:6px;font-family:inherit}
+.modal-tag{display:inline-block;background:var(--rosa-claro);color:var(--rosa-2);font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:12px}
+.modal-caixa h3{font-size:clamp(22px,3vw,27px);margin-bottom:10px}
+.modal-sub{font-size:15px;color:var(--txt-2);line-height:1.55;margin-bottom:16px}
+.modal-img{width:100%;max-width:340px;height:auto;margin:0 auto 10px}
+.modal-preco{border:2px dashed #B9E3C6;background:#E7F6EC;border-radius:14px;padding:16px;margin-bottom:18px}
+.modal-preco s{color:#958AA3;font-size:16px}
+.modal-valor{font-family:Fredoka,Inter,sans-serif;font-size:clamp(40px,6vw,50px);font-weight:700;color:#15803D;line-height:1;margin:4px 0 6px}
+.modal-valor small{font-family:Inter,sans-serif;font-size:20px;vertical-align:top;margin-right:3px}
+.modal-preco span{display:block;font-size:13.5px;color:#15803D;font-weight:700}
+.modal-caixa .btn{width:100%;padding:18px 20px}
+.modal-nao{display:block;width:100%;margin-top:12px;background:none;border:1px solid var(--borda);border-radius:12px;padding:14px;font-family:inherit;font-size:13px;font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--txt-2);cursor:pointer}
+.modal-nao:hover{background:var(--creme)}
 
 /* ---------- GARANTIA ---------- */
 .garantia{background:var(--creme)}
@@ -575,7 +601,7 @@ footer .links{font-weight:700;letter-spacing:1.4px;margin-bottom:6px}
         <div class="plano-preco"><small>R$</small>10,00</div>
         <p class="plano-obs">pagamento único · acesso imediato</p>
         <!-- CHECKOUT Essencial -->
-        <a class="btn btn-contorno full js-checkout-essencial" href="#">Quero só o guia</a>
+        <a class="btn btn-contorno full js-checkout-essencial" id="btn-essencial" data-checkout href="https://pay.wiapy.com/cvIdsgG1-pV4">Quero só o guia</a>
       </div>
 
       <div class="plano completo">
@@ -598,7 +624,7 @@ footer .links{font-weight:700;letter-spacing:1.4px;margin-bottom:6px}
         <div class="plano-preco"><small>R$</small>23,90</div>
         <p class="plano-obs">pagamento único · acesso imediato</p>
         <!-- CHECKOUT Completo -->
-        <a class="btn full js-checkout-completo" href="#">Eu quero tudo!</a>
+        <a class="btn full js-checkout-completo" data-checkout href="https://pay.wiapy.com/beZ8AxD7MON">Eu quero tudo!</a>
         <div class="selos">
           <span><svg class="ico"><use href="#i-cadeado"/></svg>Compra segura</span>
           <span><svg class="ico"><use href="#i-escudo"/></svg>7 dias de garantia</span>
@@ -608,6 +634,27 @@ footer .links{font-weight:700;letter-spacing:1.4px;margin-bottom:6px}
     </div>
   </div>
 </section>
+
+<!-- ============ POPUP DE UPSELL ============
+     Abre quando a pessoa clica no Plano Essencial. O botão "sim" usa o link PRÓPRIO
+     do PopUp Completo (R$ 16,90), não o link do Plano Completo. -->
+<div class="modal" id="upsell" hidden>
+  <div class="modal-fundo" data-fechar></div>
+  <div class="modal-caixa" role="dialog" aria-modal="true" aria-labelledby="upsell-titulo">
+    <button class="modal-x" type="button" data-fechar aria-label="Fechar">×</button>
+    <span class="modal-tag">Só nesta tela</span>
+    <h3 id="upsell-titulo">Espera! Leve <span class="r">tudo</span> por um pouquinho a mais 💖</h3>
+    <p class="modal-sub">O <b>Plano Completo</b> vem com os +100 penteados e os <b>4 bônus</b>: Cabelo Maluco, Guia SOS de Desembaraço, Penteados com Liguinhas e o Calendário de 30 Dias.</p>
+    <img class="modal-img" src="assets/planos/completo-transp-460.webp" width="460" height="345" alt="O guia principal com os 4 bônus" loading="lazy" decoding="async">
+    <div class="modal-preco">
+      <s>R$ 23,90</s>
+      <div class="modal-valor"><small>R$</small>16,90</div>
+      <span>só R$ 6,90 a mais que o Essencial</span>
+    </div>
+    <a class="btn" id="upsell-sim" data-checkout href="https://pay.wiapy.com/sLCVTs3Zu4S_">Quero o plano completo!</a>
+    <button class="modal-nao" type="button" id="upsell-nao">Não, quero só o guia</button>
+  </div>
+</div>
 
 <!-- ============ GARANTIA ============ -->
 <section class="garantia">
@@ -647,7 +694,7 @@ footer .links{font-weight:700;letter-spacing:1.4px;margin-bottom:6px}
     <h2>Chega de fazer sempre o mesmo penteado!</h2>
     <p class="sub">Tenha mais de 100 ideias com passo a passo visual e todos os bônus para facilitar sua rotina.</p>
     <!-- CHECKOUT Completo -->
-    <a class="btn js-checkout-completo ir-oferta" href="#oferta">Eu quero tudo!</a>
+    <a class="btn js-checkout-completo" data-checkout href="https://pay.wiapy.com/beZ8AxD7MON">Eu quero tudo!</a>
     <div class="selos">
       <span><svg class="ico"><use href="#i-cadeado"/></svg>Compra segura</span>
       <span><svg class="ico"><use href="#i-escudo"/></svg>7 dias de garantia</span>
@@ -735,6 +782,29 @@ document.querySelectorAll('.ir-oferta').forEach(function (b) {
   palco.querySelector('.prox').addEventListener('click', function () { mostrar(atual + 1); reiniciar(); });
   mostrar(0);
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) reiniciar();
+})();
+
+// Popup de upsell: quem clica no Plano Essencial vê o Completo por R$ 16,90 antes de seguir.
+// Quem recusa vai para o checkout do Essencial, como pediu.
+(function () {
+  var modal = document.getElementById('upsell'), abre = document.getElementById('btn-essencial'), nao = document.getElementById('upsell-nao');
+  if (!modal || !abre) return;
+  var ultimoFoco = null;
+  function abrir(e) {
+    e.preventDefault();
+    ultimoFoco = document.activeElement;
+    var barra = window.innerWidth - document.documentElement.clientWidth;
+    modal.hidden = false; document.body.style.overflow = 'hidden';
+    if (barra > 0) document.body.style.paddingRight = barra + 'px';
+    var alvo = document.getElementById('upsell-sim'); if (alvo) alvo.focus();
+  }
+  function fechar() { modal.hidden = true; document.body.style.overflow = ''; document.body.style.paddingRight = ''; if (ultimoFoco) ultimoFoco.focus(); }
+  abre.addEventListener('click', abrir);
+  modal.querySelectorAll('[data-fechar]').forEach(function (b) { b.addEventListener('click', fechar); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !modal.hidden) fechar(); });
+  // recusou: segue para o checkout do Essencial. Lê o link NA HORA do clique, porque a
+  // UTMify acrescenta as UTMs aos links depois que a página carrega.
+  if (nao) nao.addEventListener('click', function () { window.location.href = abre.getAttribute('href'); });
 })();
 </script>
 </body>
